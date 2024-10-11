@@ -20,4 +20,7 @@ use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class BankAccount
 {
+
+    
+    
     }
