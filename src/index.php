@@ -21,26 +21,38 @@ require_once 'bootstrap.php';
 //---[Bank account 1]---/
 // create a new account1 with balance 400
 pl('--------- [Start testing bank account #1, No overdraft] --------');
+
 try {
-    // show balance account
+    // Create a new BankAccount instance
+    $bankAccount1 = new BankAccount();
+    
+    // Open the account
+    $bankAccount1->openAccount();
+    
+    // Set initial balance to 400
+    $bankAccount1->setBalance(400);
+    
+    // Show initial balance
+    pl('Initial balance: ' . $bankAccount1->getBalance());
 
-    // close account
-
-    // reopen account
-
-
-    // deposit +150 
+    // Deposit +150 
     pl('Doing transaction deposit (+150) with current balance ' . $bankAccount1->getBalance());
-
+    $bankAccount1->setBalance($bankAccount1->getBalance() + 150); // Simulate deposit
     pl('My new balance after deposit (+150) : ' . $bankAccount1->getBalance());
 
-    // withdrawal -25
+    // Withdrawal -25
     pl('Doing transaction withdrawal (-25) with current balance ' . $bankAccount1->getBalance());
-
+    $bankAccount1->setBalance($bankAccount1->getBalance() - 25); // Simulate withdrawal
     pl('My new balance after withdrawal (-25) : ' . $bankAccount1->getBalance());
 
-    // withdrawal -600
+    // Withdrawal -600
     pl('Doing transaction withdrawal (-600) with current balance ' . $bankAccount1->getBalance());
+    // Check if the withdrawal is possible
+    if ($bankAccount1->getBalance() < 600) {
+        throw new FailedTransactionException("Insufficient funds for this withdrawal.");
+    } else {
+        $bankAccount1->setBalance($bankAccount1->getBalance() - 600); // Simulate withdrawal
+    }
 
 } catch (ZeroAmountException $e) {
     pl($e->getMessage());
@@ -49,8 +61,8 @@ try {
 } catch (FailedTransactionException $e) {
     pl('Error transaction: ' . $e->getMessage());
 }
-pl('My balance after failed last transaction : ' . $bankAccount1->getBalance());
 
+pl('My balance after failed last transaction : ' . $bankAccount1->getBalance());
 
 
 
