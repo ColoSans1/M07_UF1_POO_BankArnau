@@ -22,6 +22,11 @@
      {
          return $this->limit; 
      }
+
+     public function getOverdraftFundsAmount(): float
+     {
+         return 0.0; 
+     }
  
      public function getOverdraftBalance(): float
      {

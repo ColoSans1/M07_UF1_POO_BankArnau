@@ -22,7 +22,6 @@ class WithdrawTransaction implements BankTransactionInterface
         // Lógica para aplicar la transacción
         $currentBalance = $account->getBalance();
         if ($currentBalance - $this->amount < 0) {
-            throw new FailedTransactionException("Insufficient funds.");
         }
         // Resta el monto al balance
         $newBalance = $currentBalance - $this->amount;
