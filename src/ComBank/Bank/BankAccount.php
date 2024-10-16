@@ -19,7 +19,6 @@ use ComBank\Support\Traits\AmountValidationTrait;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 use ComBank\Transactions\DepositTransaction;
 use ComBank\Transactions\WithdrawTransaction;
-use PhpParser\Node\Expr\StaticCall;
 
 class BankAccount
 {
@@ -27,13 +26,13 @@ class BankAccount
     private $isOpen;
     private $overdraft; 
 
-    public function __construct(float $initialBalance = 0)
+    public function __construct(float $initialBalance = 0, OverdraftInterface $overdraft = null)
     {
-        $this->balance = $initialBalance;  // Asignar el saldo inicial
-        $this->isOpen = true;  // Por defecto, la cuenta estará abierta
+        $this->balance = $initialBalance;  
+        $this->isOpen = true;  
+        $this->overdraft = $overdraft ?: new NoOverdraft(); // Inicializa con NoOverdraft si no se proporciona
     }
 
-    // Método para procesar las transacciones
     public function transaction($transaction): void
     {
         if (!$this->isOpen) {
@@ -41,10 +40,10 @@ class BankAccount
         }
 
         if ($transaction instanceof DepositTransaction) {
-            $this->balance += $transaction->getAmount();  // Sumar la cantidad depositada
+            $this->balance += $transaction->getAmount();  
         } elseif ($transaction instanceof WithdrawTransaction) {
-            // Verificar si tiene fondos suficientes o si tiene descubierto
             $amount = $transaction->getAmount();
+            // Verifica si el saldo es suficiente o si se permite el sobregiro
             if ($this->balance - $amount < 0 && !$this->overdraft) {
                 throw new FailedTransactionException("Insufficient funds.");
             }
@@ -59,9 +58,8 @@ class BankAccount
         if ($this->isOpen) {
             throw new BankAccountException("The account is already open.");
         }
-        $this->isOpen = true;
+        $this->isOpen = true; // Abrir la cuenta
     }
-    
 
     public function closeAccount(): void
     {
@@ -76,7 +74,7 @@ class BankAccount
         if ($this->isOpen) {
             throw new BankAccountException("The account is already open.");
         }
-        $this->isOpen = true;
+        $this->isOpen = true; // Reabrir la cuenta
     }
 
     public function getBalance(): float
@@ -102,14 +100,3 @@ class BankAccount
         $this->balance = $balance;
     }
 }
-
-
-
-
-
-
-
-
-
-
-

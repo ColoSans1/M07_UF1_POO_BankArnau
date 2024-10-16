@@ -19,40 +19,31 @@ require_once 'bootstrap.php';
 
 
 //---[Bank account 1]---/
-// create a new account1 with balance 400
 pl('--------- [Start testing bank account #1, No overdraft] --------');
 
 try {
-    // Create a new BankAccount instance
-    $bankAccount1 = new BankAccount();
+    // Create a new BankAccount instance with a starting balance of 400
+    $bankAccount1 = new BankAccount(400);
     
     // Open the account
     $bankAccount1->openAccount();
     
-    // Set initial balance to 400
-    $bankAccount1->setBalance(400);
-    
     // Show initial balance
     pl('Initial balance: ' . $bankAccount1->getBalance());
 
-    // Deposit +150 
+    // Deposit +150
     pl('Doing transaction deposit (+150) with current balance ' . $bankAccount1->getBalance());
-    $bankAccount1->setBalance($bankAccount1->getBalance() + 150); // Simulate deposit
+    $bankAccount1->transaction(new DepositTransaction(150)); // Using the transaction class
     pl('My new balance after deposit (+150) : ' . $bankAccount1->getBalance());
 
     // Withdrawal -25
     pl('Doing transaction withdrawal (-25) with current balance ' . $bankAccount1->getBalance());
-    $bankAccount1->setBalance($bankAccount1->getBalance() - 25); // Simulate withdrawal
+    $bankAccount1->transaction(new WithdrawTransaction(25)); // Using the transaction class
     pl('My new balance after withdrawal (-25) : ' . $bankAccount1->getBalance());
 
     // Withdrawal -600
     pl('Doing transaction withdrawal (-600) with current balance ' . $bankAccount1->getBalance());
-    // Check if the withdrawal is possible
-    if ($bankAccount1->getBalance() < 600) {
-        throw new FailedTransactionException("Insufficient funds for this withdrawal.");
-    } else {
-        $bankAccount1->setBalance($bankAccount1->getBalance() - 600); // Simulate withdrawal
-    }
+    $bankAccount1->transaction(new WithdrawTransaction(600)); // Using the transaction class
 
 } catch (ZeroAmountException $e) {
     pl($e->getMessage());
@@ -62,7 +53,8 @@ try {
     pl('Error transaction: ' . $e->getMessage());
 }
 
-pl('My balance after failed last transaction : ' . $bankAccount1->getBalance());
+// Show final balance after attempts
+pl('My balance after all transactions: ' . $bankAccount1->getBalance());
 
 
 

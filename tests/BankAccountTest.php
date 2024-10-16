@@ -39,10 +39,10 @@ class BankAccountTest extends TestCase
         $this->expectException(BankAccountException::class);
 
         $account = new BankAccount(100.0);
-        $account->reopenAccount();  // should throw an exception because the account is already open
+        $account->reopenAccount();  
     }
 
-    // Test closing and reopening the bank account                   
+    // Test closing and reopening the bank account
     public function testCanCloseAndReopenAccount(): void
     {
         $account = new BankAccount(100.0);
