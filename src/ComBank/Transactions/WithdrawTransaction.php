@@ -13,6 +13,21 @@ use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class WithdrawTransaction 
 {
+    
+        private float $amount;
+    
+        public function __construct(float $amount)
+        {
+            if ($amount <= 0) {
+                throw new \ComBank\Exceptions\ZeroAmountException("The amount must be greater than zero.");
+            }
+            $this->amount = $amount;
+        }
+    
+        public function getAmount(): float
+        {
+            return $this->amount;
+        }
 
    
 }

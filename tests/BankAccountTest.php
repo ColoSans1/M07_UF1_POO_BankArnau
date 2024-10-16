@@ -42,7 +42,7 @@ class BankAccountTest extends TestCase
         $account->reopenAccount();  // should throw an exception because the account is already open
     }
 
-    // Test closing and reopening the bank account
+    // Test closing and reopening the bank account                   
     public function testCanCloseAndReopenAccount(): void
     {
         $account = new BankAccount(100.0);
@@ -51,7 +51,7 @@ class BankAccountTest extends TestCase
 
         $account->reopenAccount();
         $this->assertTrue($account->openAccount());
-    }
+    }                                                                                 
 
     // Test overdraft application with a mock OverdraftInterface
     public function testWithdrawWithOverdraft(): void

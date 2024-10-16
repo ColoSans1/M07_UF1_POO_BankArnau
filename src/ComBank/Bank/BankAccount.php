@@ -17,6 +17,8 @@ use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
 use ComBank\Support\Traits\AmountValidationTrait;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
+use ComBank\Transactions\DepositTransaction;
+use ComBank\Transactions\WithdrawTransaction;
 use PhpParser\Node\Expr\StaticCall;
 
 class BankAccount
@@ -25,21 +27,41 @@ class BankAccount
     private $isOpen;
     private $overdraft; 
 
-    public function __construct()
+    public function __construct(float $initialBalance = 0)
     {
-        $this->balance = 0.0;
-        $this->isOpen = false;
-        $this->overdraft = null; // No overdraft by default
+        $this->balance = $initialBalance;  // Asignar el saldo inicial
+        $this->isOpen = true;  // Por defecto, la cuenta estará abierta
     }
 
-    public function openAccount(): bool
+    // Método para procesar las transacciones
+    public function transaction($transaction): void
+    {
+        if (!$this->isOpen) {
+            throw new BankAccountException("The account is closed.");
+        }
+
+        if ($transaction instanceof DepositTransaction) {
+            $this->balance += $transaction->getAmount();  // Sumar la cantidad depositada
+        } elseif ($transaction instanceof WithdrawTransaction) {
+            // Verificar si tiene fondos suficientes o si tiene descubierto
+            $amount = $transaction->getAmount();
+            if ($this->balance - $amount < 0 && !$this->overdraft) {
+                throw new FailedTransactionException("Insufficient funds.");
+            }
+            $this->balance -= $amount;
+        } else {
+            throw new BankAccountException("Invalid transaction type.");
+        }
+    }
+
+    public function openAccount(): void
     {
         if ($this->isOpen) {
             throw new BankAccountException("The account is already open.");
         }
         $this->isOpen = true;
-        return true;
     }
+    
 
     public function closeAccount(): void
     {
@@ -80,3 +102,14 @@ class BankAccount
         $this->balance = $balance;
     }
 }
+
+
+
+
+
+
+
+
+
+
+

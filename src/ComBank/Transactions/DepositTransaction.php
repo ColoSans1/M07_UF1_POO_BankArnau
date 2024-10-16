@@ -12,7 +12,17 @@ use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class DepositTransaction 
 {
+    private $amount;
+
+    public function __construct(float $amount)
+    {
+        $this->amount = $amount;
+    }
+
+    public function getAmount(): float
+    {
+        return $this->amount;
+    }
 
 
-   
 }
