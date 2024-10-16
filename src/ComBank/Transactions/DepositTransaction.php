@@ -1,18 +1,11 @@
 <?php namespace ComBank\Transactions;
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/28/24
- * Time: 11:30 AM
- */
-
-use ComBank\Bank\Contracts\BackAccountInterface;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
+use ComBank\Bank\BankAccount;
 
-class DepositTransaction 
+class DepositTransaction implements BankTransactionInterface
 {
-    private $amount;
+    private float $amount;
 
     public function __construct(float $amount)
     {
@@ -24,5 +17,8 @@ class DepositTransaction
         return $this->amount;
     }
 
-
+    public function applyTransaction(BankAccount $account): void
+    {
+        $account->transaction($this); // Llama al método de transacción de BankAccount
+    }
 }

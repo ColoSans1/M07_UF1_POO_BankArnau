@@ -1,33 +1,45 @@
 <?php namespace ComBank\Transactions;
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/28/24
- * Time: 1:22 PM
- */
-
-use ComBank\Bank\Contracts\BackAccountInterface;
-use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
+use ComBank\Bank\BankAccount;
 
-class WithdrawTransaction 
+class WithdrawTransaction implements BankTransactionInterface
 {
-    
-        private float $amount;
-    
-        public function __construct(float $amount)
-        {
-            if ($amount <= 0) {
-                throw new \ComBank\Exceptions\ZeroAmountException("The amount must be greater than zero.");
-            }
-            $this->amount = $amount;
-        }
-    
-        public function getAmount(): float
-        {
-            return $this->amount;
-        }
+    private float $amount;
 
-   
+    public function __construct(float $amount)
+    {
+        $this->amount = $amount;
+    }
+
+    public function getAmount(): float
+    {
+        return $this->amount;
+    }
+
+    public function applyTransaction(BankAccount $account): float
+    {
+        // Lógica para aplicar la transacción
+        $currentBalance = $account->getBalance();
+        if ($currentBalance - $this->amount < 0) {
+            throw new FailedTransactionException("Insufficient funds.");
+        }
+        // Resta el monto al balance
+        $newBalance = $currentBalance - $this->amount;
+        $account->setBalance($newBalance);
+        return $newBalance; // Devuelve el nuevo balance
+    }
+
+    public function testWithdrawTransaction(): void
+{
+    $bankAccount = new BankAccount(200.0);
+    $withdrawTransaction = new WithdrawTransaction(150.0);
+    
+    // Aplicar la transacción de retiro
+    $bankAccount->transaction($withdrawTransaction);
+
+    // Comprobar que el saldo se actualiza correctamente
+    $this->assertEqualsWithDelta(50.0, $bankAccount->getBalance(), 0.001);
+}
+
 }

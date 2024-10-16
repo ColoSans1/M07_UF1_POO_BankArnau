@@ -1,88 +1,65 @@
 <?php namespace ComBank\Bank;
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/27/24
- * Time: 7:25 PM
- */
-
 use ComBank\Exceptions\BankAccountException;
-use ComBank\Exceptions\InvalidArgsException;
-use ComBank\Exceptions\ZeroAmountException;
 use ComBank\OverdraftStrategy\NoOverdraft;
 use ComBank\Bank\Contracts\BackAccountInterface;
-use ComBank\Exceptions\FailedTransactionException;
-use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
-use ComBank\Support\Traits\AmountValidationTrait;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
-use ComBank\Transactions\DepositTransaction;
-use ComBank\Transactions\WithdrawTransaction;
 
-class BankAccount
+class BankAccount implements BackAccountInterface
 {
-    private $balance;
-    private $isOpen;
-    private $overdraft; 
+    private float $balance;
+    private bool $isOpen; // Definición de la propiedad isOpen
+    private OverdraftInterface $overdraft;
 
     public function __construct(float $initialBalance = 0, OverdraftInterface $overdraft = null)
     {
-        $this->balance = $initialBalance;  
-        $this->isOpen = true;  
-        $this->overdraft = $overdraft ?: new NoOverdraft(); // Inicializa con NoOverdraft si no se proporciona
+        $this->balance = $initialBalance;
+        $this->isOpen = true; // Asegúrate de que la cuenta esté abierta al crearla
+        $this->overdraft = $overdraft ?: new NoOverdraft();
     }
 
-    public function transaction($transaction): void
+    public function transaction(BankTransactionInterface $transaction): void
     {
         if (!$this->isOpen) {
-            throw new BankAccountException("The account is closed.");
-        }
-
-        if ($transaction instanceof DepositTransaction) {
-            $this->balance += $transaction->getAmount();  
-        } elseif ($transaction instanceof WithdrawTransaction) {
-            $amount = $transaction->getAmount();
-            // Verifica si el saldo es suficiente o si se permite el sobregiro
-            if ($this->balance - $amount < 0 && !$this->overdraft) {
-                throw new FailedTransactionException("Insufficient funds.");
-            }
-            $this->balance -= $amount;
+            throw new BankAccountException("You cannot perform a transaction in a closed account.");
         } else {
-            throw new BankAccountException("Invalid transaction type.");
+            // Verifica que el método applyTransaction exista y se utilice correctamente
+            $this->balance = $transaction->applyTransaction($this);
         }
     }
 
-    public function openAccount(): void
+    public function openAccount(): bool
     {
         if ($this->isOpen) {
-            throw new BankAccountException("The account is already open.");
+            return false; // La cuenta ya está abierta
         }
         $this->isOpen = true; // Abrir la cuenta
-    }
-
-    public function closeAccount(): void
-    {
-        if (!$this->isOpen) {
-            throw new BankAccountException("The account is already closed.");
-        }
-        $this->isOpen = false;
+        return true; // Indica que se ha abierto la cuenta
     }
 
     public function reopenAccount(): void
     {
         if ($this->isOpen) {
-            throw new BankAccountException("The account is already open.");
+            throw new BankAccountException("The account is already open."); // Lanza la excepción si ya está abierta
         }
         $this->isOpen = true; // Reabrir la cuenta
+    }
+
+    public function closeAccount(): void
+    {
+        if (!$this->isOpen) {
+            throw new BankAccountException("The account is already closed."); // Lanza la excepción si ya está cerrada
+        }
+        $this->isOpen = false; // Cerrar la cuenta
     }
 
     public function getBalance(): float
     {
         return $this->balance;
     }
-    
-    public function getOverdraft(): ?OverdraftInterface
+
+    public function getOverdraft(): OverdraftInterface
     {
         return $this->overdraft;
     }
@@ -92,11 +69,8 @@ class BankAccount
         $this->overdraft = $overdraft;
     }
 
-    public function setBalance(float $balance): void
+    public function setBalance($newBalance)
     {
-        if ($balance < 0) {
-            throw new BankAccountException("Cannot set a negative balance.");
-        }
-        $this->balance = $balance;
+        $this->balance = $newBalance;
     }
 }
