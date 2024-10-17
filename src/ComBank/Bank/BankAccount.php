@@ -1,65 +1,72 @@
-<?php namespace ComBank\Bank;
+<?php
+
+namespace ComBank\Bank;
+
+/**
+ * Created by VS Code.
+ * User: JPortugal
+ * Date: 7/27/24
+ * Time: 7:25 PM
+ */
 
 use ComBank\Exceptions\BankAccountException;
-use ComBank\Bank\Contracts\BackAccountInterface;
-use ComBank\Transactions\Contracts\BankTransactionInterface;
-use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
+use ComBank\Exceptions\InvalidArgsException;
+use ComBank\Exceptions\ZeroAmountException;
 use ComBank\OverdraftStrategy\NoOverdraft;
-
+use ComBank\Bank\Contracts\BackAccountInterface;
+use ComBank\Exceptions\FailedTransactionException;
+use ComBank\Exceptions\InvalidOverdraftFundsException;
+use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
+use ComBank\Support\Traits\AmountValidationTrait;
+use ComBank\Transactions\Contracts\BankTransactionInterface;
+use Exception;
 
 class BankAccount implements BackAccountInterface
 {
-   // Propiedades de la clase
-   private $balance;
-   private $isOpen; 
-   private $overdraft;
+    use AmountValidationTrait;
 
-    public function __construct(float $initialBalance = 0, OverdraftInterface $overdraft = null)
+    private  $balance;
+
+    private  $status;
+
+    private  $overdraft;
+
+    function __construct(float $balance = 100)
     {
-        $this->balance = $initialBalance;
-        $this->isOpen = true;  
-        $this->overdraft = $overdraft ?: new NoOverdraft();
+        $this->validateAmount($balance);
+        
+        $this->balance = $balance;
+        $this->status = true;
+        $this->overdraft =  new NoOverdraft();
     }
 
     public function transaction(BankTransactionInterface $transaction): void
     {
-        if (!$this->isOpen) {
-            throw new BankAccountException("You cannot perform a transaction in a closed account.");
-        }
-        // Lógica de la transacción
-        $this->balance = $transaction->applyTransaction($this);
+        if (!isset($this->status) || !$this->status) throw new BankAccountException("La cuenta no esta abierta");
+        $transaction->applyTransaction($this);
     }
 
-    public function openAccount(): bool
+    public function openAccount():bool
     {
-        if ($this->isOpen) {
-            return true; 
-        }
-        $this->isOpen = true; 
-        return $this->isOpen; 
+        if (!isset($this->status)) $this->status = true;
+
+        return $this->status;
     }
 
-    public function isOpen(): bool
+    public function reopenAccount(): void
     {
-        return $this->isOpen; 
+        if (!isset($this->status)) throw new BankAccountException('La cuenta no ha sido nunca abierta antes');
+        if ($this->status) throw new BankAccountException('La cuenta ya esta abierta');
+
+        $this->status = true;
     }
 
-    public function reopenAccount(): bool
-    {
-        if ($this->isOpen) {
-            throw new \ComBank\Exceptions\BankAccountException("The account is already open.");
-        }
-        $this->isOpen = true; // Reabrir la cuenta si estaba cerrada
-        return $this->isOpen; // Devolver el estado
-    }
-    
-    
     public function closeAccount(): void
     {
-        if (!$this->isOpen) {
-            throw new BankAccountException("The account is already closed.");
-        }
-        $this->isOpen = false; 
+        if (!isset($this->status)) throw new BankAccountException('La cuenta no ha sido nunca abierta antes');
+        if (!$this->status) throw new BankAccountException('La cuenta ya esta cerrada');
+
+        $this->status = false;
     }
 
     public function getBalance(): float
@@ -72,13 +79,17 @@ class BankAccount implements BackAccountInterface
         return $this->overdraft;
     }
 
-    public function applyOverdraft(OverdraftInterface $overdraft): void
-    {
+    public function applyOverdraft(OverdraftInterface $overdraft): void {
         $this->overdraft = $overdraft;
     }
 
-    public function setBalance($newBalance): void
+    public function setBalance(float $balance): void
     {
-        $this->balance = $newBalance; 
+        $this->balance = $balance;
     }
+    public function getStatus()
+    {
+        return $this->status;
+    }
+    
 }

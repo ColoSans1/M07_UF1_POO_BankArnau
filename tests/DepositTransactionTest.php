@@ -18,15 +18,16 @@ class DepositTransactionTest extends TestCase
     /**
      * @test
      * */
+
     public function testApplyTransaction()
     {
         $bankAccount =  new BankAccount(50.25);
         $amount = 25.25;
         $trans = new DepositTransaction($amount);
-        $newBalance = $trans->applyTransaction($bankAccount);
+        $newBalance = $trans->applyTransaction($bankAccount); 
         $this->assertEquals(75.50, $newBalance);
     }
-    /**
+    /**  Failed Asseting that null matches expected 75.5
      * @test
      * @dataProvider invalidAmountProvider
      * @expectedException ComBank\Exceptions\ZeroAmountException

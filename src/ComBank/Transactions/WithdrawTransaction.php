@@ -2,6 +2,7 @@
 
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 use ComBank\Bank\BankAccount;
+use ComBank\Exceptions\FailedTransactionException;
 
 class WithdrawTransaction implements BankTransactionInterface
 {
@@ -16,29 +17,17 @@ class WithdrawTransaction implements BankTransactionInterface
     {
         return $this->amount;
     }
-
-    public function applyTransaction(BankAccount $account): float
+    public function applyTransaction(BankAccount $account): void
     {
-        // Lógica para aplicar la transacción
+        // Obtener el balance actual
         $currentBalance = $account->getBalance();
-        if ($currentBalance - $this->amount < 0) {
-        }
-        // Resta el monto al balance
-        $newBalance = $currentBalance - $this->amount;
+        
+        // Sumar el monto al balance
+        $newBalance = $currentBalance + $this->amount;
+        
+        // Establecer el nuevo balance en el banco
         $account->setBalance($newBalance);
-        return $newBalance; // Devuelve el nuevo balance
     }
-
-    public function testWithdrawTransaction(): void
-{
-    $bankAccount = new BankAccount(200.0);
-    $withdrawTransaction = new WithdrawTransaction(150.0);
     
-    // Aplicar la transacción de retiro
-    $bankAccount->transaction($withdrawTransaction);
-
-    // Comprobar que el saldo se actualiza correctamente
-    $this->assertEqualsWithDelta(50.0, $bankAccount->getBalance(), 0.001);
-}
-
+    
 }
