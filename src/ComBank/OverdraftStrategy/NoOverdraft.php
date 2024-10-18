@@ -42,5 +42,10 @@
      {
 
     }
+
+    public function isGrantOverdraftFunds(float $amount): bool
+    {
+        return false;
+    }
  }
  
