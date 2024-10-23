@@ -16,7 +16,6 @@ interface BackAccountInterface
 {
     const STATUS_OPEN = 'OPEN';
     const STATUS_CLOSED = 'CLOSED';
-
     public function transaction(BankTransactionInterface $transaction): void;
 
     public function openAccount():bool;

@@ -2,32 +2,29 @@
 
 namespace ComBank\Transactions;
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/28/24
- * Time: 11:30 AM
- */
-
+use ComBank\Exceptions\ZeroAmountException; // Asegúrate de importar la excepción correctamente
 use ComBank\Bank\Contracts\BackAccountInterface;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class DepositTransaction extends BaseTransaction implements BankTransactionInterface
 {
+    protected $amount;
+
     public function __construct($amount)
     {
-        parent::validateAmount($amount);
+        // Valida que el monto no sea cero o negativo
+        if ($amount <= 0) {
+            throw new ZeroAmountException("Amount cannot be zero or negative.");
+        }
 
+        parent::validateAmount($amount);
         $this->amount = $amount;
     }
 
     public function applyTransaction(BackAccountInterface $account): float
     {
-
         $newBalance = $account->getBalance() + $this->getAmount();
-
         $account->setBalance($newBalance);
-
         return $account->getBalance();
     }
 
@@ -40,5 +37,9 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
     {
         return $this->amount;
     }
-    
+
+    public function getTransactionInfo(): string
+    {
+        return "DEPOSIT_TRANSACTION";
+    }
 }

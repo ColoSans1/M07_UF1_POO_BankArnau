@@ -75,6 +75,7 @@ class BankAccountTest extends TestCase
         $bankAccount->transaction(new WithdrawTransaction(201.0));// should fail
     }
 
+
     // Test closing an account and performing a transaction after that, which should fail
     public function testTransactionAfterAccountClosed(): void
     {

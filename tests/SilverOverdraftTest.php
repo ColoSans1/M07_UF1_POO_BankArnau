@@ -22,7 +22,6 @@ class SilverOverdraftTest extends TestCase
         $overdraft = new SilverOverdraft();
         $this->assertEquals($expected,$overdraft->isGrantOverdraftFunds($newAmount));
     }
-
     /**
      * @return array;
      * */

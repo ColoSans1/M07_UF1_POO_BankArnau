@@ -87,9 +87,19 @@ class BankAccount implements BackAccountInterface
     {
         $this->balance = $balance;
     }
+
+
+    /**
+     * Get the value of status
+     */
     public function getStatus()
     {
         return $this->status;
     }
-    
+
+    /**
+     * Set the value of status
+     *
+     * @return  self
+     */
 }
