@@ -67,7 +67,7 @@ class WithdrawTransactionTest extends TestCase
     public function testInvalidAmount($amount)
     {
         $this->expectException(ZeroAmountException::class);
-        new WithdrawTransaction($amount);
+        new WithdrawTransaction(amount: $amount);
     }
     
     /**
