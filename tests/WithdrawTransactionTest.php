@@ -76,7 +76,7 @@ class WithdrawTransactionTest extends TestCase
     public function testTransactionInfo()
     {
         $trans = new WithdrawTransaction(22.0);
-        $this->assertEquals('WITHDRAW_TRANSACTION',$trans->getTransactionInfo());
+        $this->assertEquals('WITHDRAW_TRANSACTION',$trans->getTransaction());
     }
     /**
      * @test

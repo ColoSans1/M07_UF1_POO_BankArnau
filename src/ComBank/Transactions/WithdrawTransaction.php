@@ -8,7 +8,7 @@ use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\OverdraftStrategy\NoOverdraft;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 use ComBank\Exceptions\FailedTransactionException;
-use ComBank\Transactions\ZeroAmountException;
+use ComBank\Exceptions\ZeroAmountException;
 
 
 class WithdrawTransaction extends BaseTransaction implements BankTransactionInterface
@@ -16,7 +16,7 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
     public function __construct($amount)
     {
         // Validar si la cantidad es 0
-        if ($amount == 0) {
+        if ($amount <= 0  ) {
             throw new ZeroAmountException("The amount cannot be zero.");
         }
         // Validar el monto utilizando la validación del padre
