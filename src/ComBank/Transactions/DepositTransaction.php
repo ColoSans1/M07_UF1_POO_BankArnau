@@ -21,6 +21,11 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
         $this->amount = $amount;
     }
 
+    public function getTransaction(): string
+    {
+        return "DEPOSIT_TRANSACTION";
+    }
+
     public function applyTransaction(BackAccountInterface $account): float
     {
         $newBalance = $account->getBalance() + $this->getAmount();
@@ -28,7 +33,7 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
         return $account->getBalance();
     }
 
-    public function getTransaction(): string
+    public function getTransactionInfo(): string
     {
         return "DEPOSIT_TRANSACTION";
     }
@@ -38,8 +43,5 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
         return $this->amount;
     }
 
-    public function getTransactionInfo(): string
-    {
-        return "DEPOSIT_TRANSACTION";
-    }
+
 }

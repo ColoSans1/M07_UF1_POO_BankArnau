@@ -34,7 +34,6 @@ class BankAccount implements BackAccountInterface
     function __construct(float $balance = 100)
     {
         $this->validateAmount($balance);
-        
         $this->balance = $balance;
         $this->status = true;
         $this->overdraft =  new NoOverdraft();
@@ -42,7 +41,7 @@ class BankAccount implements BackAccountInterface
 
     public function transaction(BankTransactionInterface $transaction): void
     {
-        if (!isset($this->status) || !$this->status) throw new BankAccountException("La cuenta no esta abierta");
+        if (!isset($this->status) || !$this->status) throw new BankAccountException("Open Account");
         $transaction->applyTransaction($this);
     }
 
@@ -53,26 +52,34 @@ class BankAccount implements BackAccountInterface
         return $this->status;
     }
 
+    public function getBalance(): float
+    {
+        return $this->balance;
+    }
+
+
     public function reopenAccount(): void
     {
-        if (!isset($this->status)) throw new BankAccountException('La cuenta no ha sido nunca abierta antes');
-        if ($this->status) throw new BankAccountException('La cuenta ya esta abierta');
+        if (!isset($this->status)) throw new BankAccountException('The account has never been opened before');
+        if ($this->status) throw new BankAccountException('The Account is Open');
 
         $this->status = true;
     }
 
     public function closeAccount(): void
     {
-        if (!isset($this->status)) throw new BankAccountException('La cuenta no ha sido nunca abierta antes');
-        if (!$this->status) throw new BankAccountException('La cuenta ya esta cerrada');
+        if (!isset($this->status)) throw new BankAccountException('The account has never been opened before');
+        if (!$this->status) throw new BankAccountException('The account is already closed');
 
         $this->status = false;
     }
 
-    public function getBalance(): float
+    
+    public function setBalance(float $balance): void
     {
-        return $this->balance;
+        $this->balance = $balance;
     }
+
 
     public function getOverdraft(): OverdraftInterface
     {
@@ -83,23 +90,10 @@ class BankAccount implements BackAccountInterface
         $this->overdraft = $overdraft;
     }
 
-    public function setBalance(float $balance): void
-    {
-        $this->balance = $balance;
-    }
 
-
-    /**
-     * Get the value of status
-     */
     public function getStatus()
     {
         return $this->status;
     }
 
-    /**
-     * Set the value of status
-     *
-     * @return  self
-     */
 }

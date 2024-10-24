@@ -2,13 +2,6 @@
 use ComBank\OverdraftStrategy\NoOverdraft;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/28/24
- * Time: 2:05 PM
- */
-
 class NoOverdraftTest extends TestCase
 {
 
