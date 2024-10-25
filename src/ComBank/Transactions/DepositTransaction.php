@@ -12,6 +12,7 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
 
     public function __construct($amount)
     {
+        // Valida que el monto no sea cero o negativo
         if ($amount <= 0) {
             throw new ZeroAmountException("Amount cannot be zero or negative.");
         }
