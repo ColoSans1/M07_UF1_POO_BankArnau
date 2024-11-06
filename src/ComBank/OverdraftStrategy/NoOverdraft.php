@@ -15,8 +15,9 @@
  
      public function canWithdraw(float $amount): bool
      {
-         return $amount <= 0; 
+         return $amount <= 0 && $amount <= $this->getLimit();
      }
+     
  
      public function getLimit(): float
      {

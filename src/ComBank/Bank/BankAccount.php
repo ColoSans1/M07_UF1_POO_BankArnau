@@ -25,11 +25,10 @@ class BankAccount implements BackAccountInterface
 {
     use AmountValidationTrait;
 
-    private  $balance;
-
-    private  $status;
-
-    private  $overdraft;
+    protected $balance;  
+    private bool $status;
+    private OverdraftInterface $overdraft;
+    
 
     function __construct(float $balance = 100)
     {
@@ -38,6 +37,8 @@ class BankAccount implements BackAccountInterface
         $this->status = true;
         $this->overdraft =  new NoOverdraft();
     }
+
+    
 
     public function transaction(BankTransactionInterface $transaction): void
     {
@@ -86,10 +87,10 @@ class BankAccount implements BackAccountInterface
         return $this->overdraft;
     }
 
-    public function applyOverdraft(OverdraftInterface $overdraft): void {
-        $this->overdraft = $overdraft;
+    public function applyOverdraft($overdraftStrategy): void
+    {
+        $this->overdraft = $overdraftStrategy; 
     }
-
 
     public function getStatus()
     {

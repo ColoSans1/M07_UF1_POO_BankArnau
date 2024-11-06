@@ -2,24 +2,20 @@
 
 namespace ComBank\Transactions;
 
-
 use ComBank\Bank\Contracts\BackAccountInterface;
 use ComBank\Exceptions\InvalidOverdraftFundsException;
-use ComBank\OverdraftStrategy\NoOverdraft;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 use ComBank\Exceptions\FailedTransactionException;
 use ComBank\Exceptions\ZeroAmountException;
-
 
 class WithdrawTransaction extends BaseTransaction implements BankTransactionInterface
 {
     public function __construct($amount)
     {
-        // Validar si la cantidad es 0
-        if ($amount <= 0  ) {
-            throw new ZeroAmountException("The amount cannot be zero.");
+        if ($amount <= 0) {
+            throw new ZeroAmountException("The amount cannot be zero or negative.");
         }
-        // Validar el monto utilizando la validación del padre
+
         parent::validateAmount($amount);
 
         $this->amount = $amount;
@@ -38,6 +34,7 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
                 }
             }
         }
+        
         $account->setBalance($newBalance);
 
         return $account->getBalance();
@@ -52,5 +49,4 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
     {
         return $this->amount;
     }
-    
 }
