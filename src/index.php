@@ -8,6 +8,7 @@
  */
 
  use ComBank\Bank\BankAccount;
+ use ComBank\Bank\ApiTrait;
  use ComBank\Bank\NationalBankAccount;
  use ComBank\Bank\InternationalBankAccount;
  use ComBank\OverdraftStrategy\SilverOverdraft;
@@ -67,7 +68,6 @@
  
  
  
- 
  //---[Bank account 2]---/
  pl('--------- [Start testing bank account #2, Silver overdraft (100.0 funds)] --------');
  try {
@@ -116,3 +116,67 @@
  } catch (ZeroAmountException $e) {
      pl('' . $e->getMessage());
  }
+
+// ---[Start testing national account (no conversion)]---/
+pl('--------- [Start testing national account (no conversion)] --------');
+
+try {
+    // Crear una cuenta nacional con un saldo inicial de 500 EUR
+    $nationalAccount = new BankAccount(500.0);
+
+    // Mostrar saldo de la cuenta nacional
+    pl('Initial balance of national account: ' . $nationalAccount->getBalance());
+
+    // Realizar un depósito de +200 EUR
+    pl('Depositing +200 EUR with current balance ' . $nationalAccount->getBalance());
+    $nationalAccount->transaction(new DepositTransaction(200.0));
+    pl('New balance after deposit (+200 EUR): ' . $nationalAccount->getBalance());
+
+    // Realizar un retiro de -150 EUR
+    pl('Withdrawing -150 EUR with current balance ' . $nationalAccount->getBalance());
+    $nationalAccount->transaction(new WithdrawTransaction(150.0));
+    pl('New balance after withdrawal (-150 EUR): ' . $nationalAccount->getBalance());
+
+    // Intentar realizar un retiro mayor que el saldo disponible, -700 EUR
+    pl('Attempting withdrawal of -700 EUR with current balance ' . $nationalAccount->getBalance());
+    $nationalAccount->transaction(new WithdrawTransaction(700));
+
+} catch (ZeroAmountException $e) {
+    pl($e->getMessage());
+} catch (BankAccountException $e) {
+    pl($e->getMessage());
+} catch (FailedTransactionException $e) {
+    pl('Error transaction: ' . $e->getMessage());
+    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
+} catch (InvalidOverdraftFundsException $e) {
+    pl('Error transaction: ' . $e->getMessage());
+}
+
+// ---[Start testing national account dollar conversion]---/
+pl('--------- [Start testing national account dollar conversion] --------');
+
+try {
+    // Crear una cuenta internacional con un saldo de 300 EUR
+    $nationalAccount = new InternationalBankAccount(300.0, 1.10);  // Usar la clase que implementa el trait
+
+    pl('Initial balance of national account (EUR): ' . $nationalAccount->getBalance());
+
+    // Convertir el saldo usando el método del trait
+    $convertedBalance = $nationalAccount->getConvertedCurrency();  // Este método llama al trait
+
+    pl('Converted balance to USD (using conversion API): ' . $convertedBalance);
+
+    pl('Converted balance (expected 330 USD): ' . $convertedBalance);
+
+} catch (\InvalidArgumentException $e) {
+    pl($e->getMessage());
+} catch (FailedTransactionException $e) {
+    pl('Error transaction: ' . $e->getMessage());
+    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
+} catch (\Exception $e) {
+    pl('Unexpected error: ' . $e->getMessage());
+}
+
+// ---[Check Gmail verification Test]---/
+
+pl('--------[START GMAIL TEST VALIDATION]---------');

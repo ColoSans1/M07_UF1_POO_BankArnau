@@ -38,8 +38,6 @@ class BankAccount implements BackAccountInterface
         $this->overdraft =  new NoOverdraft();
     }
 
-    
-
     public function transaction(BankTransactionInterface $transaction): void
     {
         if (!isset($this->status) || !$this->status) throw new BankAccountException("Open Account");
