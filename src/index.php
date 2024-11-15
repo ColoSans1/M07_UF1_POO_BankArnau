@@ -18,9 +18,9 @@
  use ComBank\Exceptions\FailedTransactionException;
  use ComBank\Exceptions\InvalidOverdraftFundsException;
  use ComBank\Exceptions\ZeroAmountException;
- 
+ use ComBank\Bank\Person;
  require_once 'bootstrap.php';
- 
+ require_once __DIR__ . '/../vendor/autoload.php'; 
  
  //---[Bank account 1]---/
  // create a new account1 with balance 400
@@ -156,17 +156,14 @@ try {
 pl('--------- [Start testing national account dollar conversion] --------');
 
 try {
-    // Crear una cuenta internacional con un saldo de 300 EUR
-    $nationalAccount = new InternationalBankAccount(300.0, 1.10);  // Usar la clase que implementa el trait
+    $nationalAccount = new InternationalBankAccount(400.0, 1.10); 
 
     pl('Initial balance of national account (EUR): ' . $nationalAccount->getBalance());
 
-    // Convertir el saldo usando el método del trait
-    $convertedBalance = $nationalAccount->getConvertedCurrency();  // Este método llama al trait
+    $convertedBalance = $nationalAccount->getConvertedCurrency(); 
+    pl('Converted balance to EUR (using conversion API): ' . $convertedBalance);
 
-    pl('Converted balance to USD (using conversion API): ' . $convertedBalance);
-
-    pl('Converted balance (expected 330 USD): ' . $convertedBalance);
+    pl('Converted balance (expected 330 EUR): ' . $convertedBalance);
 
 } catch (\InvalidArgumentException $e) {
     pl($e->getMessage());
@@ -177,6 +174,32 @@ try {
     pl('Unexpected error: ' . $e->getMessage());
 }
 
-// ---[Check Gmail verification Test]---/
+// ---[Start testing Gmail validation]---/
+pl('--------- [Start testing Gmail validation] --------');
 
-pl('--------[START GMAIL TEST VALIDATION]---------');
+try {
+    $person = new Person('John Doe', '12345', 'johndoe@gmail.com'); 
+
+    pl('Email to validate: ' . $person->getEmail());
+
+    // Validar formato del correo
+    if (filter_var($person->getEmail(), FILTER_VALIDATE_EMAIL)) {
+        pl('Email format is valid!');
+
+        // Llamada a la función de validación del correo
+        $response = $person->verificationGmail($person->getEmail());
+
+        // Verificar el estado del correo
+        if ($response['status'] === 'undeliverable') {
+            pl('Email is undeliverable.');
+        } else {
+            pl('Email is deliverable and valid.');
+        }
+    } else {
+        pl('Email format is invalid.');
+    }
+} catch (\InvalidArgumentException $e) {
+    pl('Invalid Argument Error: ' . $e->getMessage());
+} catch (\Exception $e) {
+    pl('Unexpected error during Gmail validation: ' . $e->getMessage());
+}

@@ -24,19 +24,23 @@ use Exception;
 class BankAccount implements BackAccountInterface
 {
     use AmountValidationTrait;
+    use AmountValidationTrait;
 
     protected $balance;  
     private bool $status;
     private OverdraftInterface $overdraft;
     
-
     function __construct(float $balance = 100)
     {
-        $this->validateAmount($balance);
+        $this->validateAmount($balance);  
+    
         $this->balance = $balance;
+    
         $this->status = true;
-        $this->overdraft =  new NoOverdraft();
+    
+        $this->overdraft = new NoOverdraft();
     }
+    
 
     public function transaction(BankTransactionInterface $transaction): void
     {

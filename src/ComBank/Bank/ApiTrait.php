@@ -5,56 +5,66 @@ namespace ComBank\Bank;
 trait ApiTrait
 {
     private $apiUrl = 'https://open.er-api.com/v6/latest/EUR';
-
     private $apiUrlGmail = 'https://emailvalidation.abstractapi.com/v1/?api_key=2d07314255484ac29e131d918e04dcf1&email=';
+
+    private function makeApiRequest(string $url): string    
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 10
+        ]);
+        
+        $data = curl_exec($ch);
+        if ($error = curl_errno($ch)) {
+            throw new \Exception('cURL error: ' . curl_strerror($error));
+        }
+        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+            throw new \Exception('API error: Invalid response');
+        }
+        curl_close($ch);
+        
+        return $data;
+    }
 
     public function convertCurrency(float $amount, string $from = 'EUR', string $to = 'USD'): float
     {
-        if ($from !== 'EUR') {
-            throw new \InvalidArgumentException("This API only supports conversion from EUR to another currency.");
-        }
-
-        $response = file_get_contents($this->apiUrl);
-        $data = json_decode($response, true);
-
-        if (!isset($data['rates'][$to])) {
+        $response = $this->makeApiRequest($this->apiUrl);
+        $rates = json_decode($response, true)['rates'] ?? [];
+        
+        if (!isset($rates[$to])) {
             throw new \InvalidArgumentException("Unsupported target currency: {$to}");
         }
-
-        $rate = $data['rates'][$to];
-
-        return $amount * $rate;
+        
+        return ($amount / $rates[$from]) * $rates[$to];
     }
-
+    
     public function verificationGmail(string $email): array
     {
-        $url = $this->apiUrlGmail . urlencode($email);
-    
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); 
-    
-        $data = curl_exec($ch);
-        
-        if (curl_errno($ch)) {
-            throw new \Exception('Error en la solicitud cURL: ' . curl_error($ch));
+        if (empty($email)) {
+            throw new \Exception('Email is required.');
         }
     
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($httpCode !== 200) {
-            throw new \Exception('Error: API no disponible, código de respuesta: ' . $httpCode);
-        }
-    
-        curl_close($ch);
-    
+        $encodedEmail = urlencode($email);
+        $data = $this->makeApiRequest($this->apiUrlGmail . $encodedEmail);
         $response = json_decode($data, true);
-        if (!isset($response['is_valid'])) {
-            throw new \Exception('No se pudo verificar la validez del correo electrónico.');
+    
+        if (isset($response['error'])) {
+            throw new \Exception('API error: ' . $response['error']['message']);
         }
     
-        return $response;
+        if (!isset($response['is_valid_format']) || !$response['is_valid_format']['value']) {
+            throw new \Exception('Invalid email format.');
+        }
+    
+        if (isset($response['deliverability']) && $response['deliverability'] === 'UNDELIVERABLE') {
+            return ['status' => 'undeliverable', 'email' => $email];
+        }
+    
+        return ['status' => 'valid', 'email' => $email];
     }
     
+
 }
+
