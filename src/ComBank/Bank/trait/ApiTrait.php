@@ -1,6 +1,6 @@
 <?php
 
-namespace ComBank\Bank;
+namespace ComBank\Bank\trait;
 
 trait ApiTrait
 {
@@ -64,7 +64,4 @@ trait ApiTrait
     
         return ['status' => 'valid', 'email' => $email];
     }
-    
-
 }
-

@@ -24,7 +24,6 @@ use Exception;
 class BankAccount implements BackAccountInterface
 {
     use AmountValidationTrait;
-    use AmountValidationTrait;
 
     protected $balance;  
     private bool $status;
