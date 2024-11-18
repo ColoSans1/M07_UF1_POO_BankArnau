@@ -174,29 +174,48 @@ try {
     pl('Unexpected error: ' . $e->getMessage());
 }
 
-// ---[Start testing Gmail validation]---/
-pl('--------- [Start testing Gmail validation] --------');
+// ---[Start testing national account dollar conversion]---/
+pl('--------- [Start testing national account dollar conversion] --------');
 
 try {
-    $person = new Person('John Doe', '12345', 'johndoe@gmail.com'); 
+    $nationalAccount = new InternationalBankAccount(400.0, 1.10); 
 
+    pl('Initial balance of national account (EUR): ' . $nationalAccount->getBalance());
+
+    $convertedBalance = $nationalAccount->getConvertedCurrency(); 
+    pl('Converted balance to EUR (using conversion API): ' . $convertedBalance);
+
+    pl('Converted balance (expected 330 EUR): ' . $convertedBalance);
+
+} catch (\InvalidArgumentException $e) {
+    pl($e->getMessage());
+} catch (FailedTransactionException $e) {
+    pl('Error transaction: ' . $e->getMessage());
+    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
+} catch (\Exception $e) {
+    pl('Unexpected error: ' . $e->getMessage());
+}
+
+
+try {
+    $person = new Person('John Doe', '12345', 'example@fakemail.fakess'); 
+
+    pl('--------- [Start testing Gmail validation] --------');
     pl('Email to validate: ' . $person->getEmail());
 
     // Validar formato del correo
     if (filter_var($person->getEmail(), FILTER_VALIDATE_EMAIL)) {
-        pl('Email format is valid!');
-
         // Llamada a la función de validación del correo
         $response = $person->verificationGmail($person->getEmail());
 
-        // Verificar el estado del correo
+        // Mensajes personalizados según el estado del correo
         if ($response['status'] === 'undeliverable') {
-            pl('Email is undeliverable.');
+            pl('Email is not valid.');
         } else {
-            pl('Email is deliverable and valid.');
+            pl('Email is valid.');
         }
     } else {
-        pl('Email format is invalid.');
+        pl('Email is not valid.');
     }
 } catch (\InvalidArgumentException $e) {
     pl('Invalid Argument Error: ' . $e->getMessage());

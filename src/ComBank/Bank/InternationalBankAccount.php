@@ -4,30 +4,22 @@ namespace ComBank\Bank;
 
 use ComBank\Bank\ApiTrait;
 
+
+namespace ComBank\Bank;
+
 class InternationalBankAccount extends BankAccount
 {
-    use ApiTrait; 
+    private $conversionRate;
 
-    private float $conversionRate;
-
-    public function __construct(float $balance, float $conversionRate = 1.0)
+    public function __construct($balance, $conversionRate)
     {
-        parent::__construct($balance);  
-        $this->conversionRate = $conversionRate;  
+        parent::__construct($balance);
+        $this->conversionRate = $conversionRate;
     }
 
-    public function getConvertedCurrency(string $from = 'EUR', string $to = 'USD'): float
-    {
-        return $this->convertCurrency($this->getBalance(), $from, $to);
-    }
-
-    public function getConvertedBalance(): float
+    // Método para obtener el saldo convertido
+    public function getConvertedCurrency()
     {
         return $this->getBalance() * $this->conversionRate;
-    }
-
-    public function getConvertedCurrencyCode(): string
-    {
-        return 'USD';
     }
 }

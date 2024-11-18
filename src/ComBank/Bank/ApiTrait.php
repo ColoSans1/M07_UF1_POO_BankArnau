@@ -5,7 +5,10 @@ namespace ComBank\Bank\trait;
 trait ApiTrait
 {
     private $apiUrl = 'https://open.er-api.com/v6/latest/EUR';
+    private $fraudAPI = 'https://673b5147339a4ce4451baa5a.mockapi.io/FraudDetection/transactions';
+
     private $apiUrlGmail = 'https://emailvalidation.abstractapi.com/v1/?api_key=2d07314255484ac29e131d918e04dcf1&email=';
+
 
     private function makeApiRequest(string $url): string    
     {
@@ -39,7 +42,7 @@ trait ApiTrait
         
         return ($amount / $rates[$from]) * $rates[$to];
     }
-    
+
     public function verificationGmail(string $email): array
     {
         if (empty($email)) {
@@ -47,21 +50,23 @@ trait ApiTrait
         }
     
         $encodedEmail = urlencode($email);
-        $data = $this->makeApiRequest($this->apiUrlGmail . $encodedEmail);
-        $response = json_decode($data, true);
+        $response = $this->makeApiRequest($this->apiUrlGmail . $encodedEmail);
+        $data = json_decode($response, true);
     
-        if (isset($response['error'])) {
-            throw new \Exception('API error: ' . $response['error']['message']);
+        if (isset($data['error'])) {
+            throw new \Exception('API error: ' . $data['error']['message']);
         }
     
-        if (!isset($response['is_valid_format']) || !$response['is_valid_format']['value']) {
+        if (!isset($data['is_valid_format']['value']) || !$data['is_valid_format']['value']) {
             throw new \Exception('Invalid email format.');
         }
     
-        if (isset($response['deliverability']) && $response['deliverability'] === 'UNDELIVERABLE') {
+        if (isset($data['deliverability']) && strtolower($data['deliverability']) === 'undeliverable') {
             return ['status' => 'undeliverable', 'email' => $email];
         }
     
         return ['status' => 'valid', 'email' => $email];
     }
+
+    
 }
