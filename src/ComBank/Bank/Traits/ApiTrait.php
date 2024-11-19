@@ -8,8 +8,8 @@ trait ApiTrait
 {
     private string $currencyApiUrl = 'https://open.er-api.com/v6/latest/EUR';
     private string $fraudApiUrl = 'https://673b5147339a4ce4451baa5a.mockapi.io/FraudDetection/transactions';
-    private string $emailValidationApiUrl = 'https://emailvalidation.abstractapi.com/v1/';
-    private string $emailValidationApiKey = '2d07314255484ac29e131d918e04dcf1';
+    private string $apiUrlGmail = 'https://emailvalidation.abstractapi.com/v1/?api_key=2d07314255484ac29e131d918e04dcf1&email=';
+
 
 
     private function makeApiRequest(string $url): string
@@ -59,7 +59,8 @@ trait ApiTrait
             throw new \InvalidArgumentException('Invalid email format.');
         }
     
-        $url = $this->emailValidationApiUrl . '?api_key=' . $this->emailValidationApiKey . '&email=' . urlencode($email);
+        // Construir la URL utilizando la propiedad
+        $url = $this->apiUrlGmail . urlencode($email);
         $response = $this->makeApiRequest($url);
         $data = json_decode($response, true);
     
@@ -76,7 +77,7 @@ trait ApiTrait
             'email' => $email,
         ];
     }
-
+    
 
     public function detectFraud(BankTransactionInterface $transaction): array
     {  

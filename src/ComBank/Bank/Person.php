@@ -1,24 +1,24 @@
 <?php
-namespace ComBank\Person;
+namespace ComBank\Bank;
 
-use ComBank\Person\Exceptions\InvalidEmailException;
+use ComBank\Bank\Traits\ApiTrait;
 
-use Combank\Bank\ApiTrait;
 class Person
 {
+    use ApiTrait; 
+
     private string $name;
     private string $idCard;
     private string $email;
 
-
     public function __construct($name, $idCard, $email)
     {
-         
-        if ($this->validateEmail($email)) {
-            $this->name = $name;
-            $this->idCard = $idCard;
-            $this->email = $email;
-        } 
+        $validation = $this->validateEmail($email);
+        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE')
+
+        $this->name = $name;
+        $this->idCard = $idCard;
+        $this->email = $email;
     }
 
     public function getName()
@@ -29,7 +29,6 @@ class Person
     public function setName($name)
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -41,7 +40,6 @@ class Person
     public function setIdCard($idCard)
     {
         $this->idCard = $idCard;
-
         return $this;
     }
 
@@ -50,11 +48,12 @@ class Person
         return $this->email;
     }
 
-
     public function setEmail($email)
     {
+        // Validar el email antes de asignarlo
+        $validation = $this->validateEmail($email);
+        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE')
         $this->email = $email;
-
         return $this;
     }
 }

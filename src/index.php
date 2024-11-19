@@ -8,7 +8,6 @@
  */
 
  use ComBank\Bank\BankAccount;
- use ComBank\Bank\ApiTrait;
  use ComBank\Bank\NationalBankAccount;
  use ComBank\Bank\InternationalBankAccount;
  use ComBank\OverdraftStrategy\SilverOverdraft;
@@ -19,7 +18,7 @@
  use ComBank\Exceptions\InvalidOverdraftFundsException;
  use ComBank\Exceptions\ZeroAmountException;
  use ComBank\Bank\Person;
- use Combank\Bank\trait;
+ use Combank\Bank\trait\ApiTrait;
 
  require_once 'bootstrap.php';
  require_once __DIR__ . '/../vendor/autoload.php'; 
@@ -200,27 +199,23 @@ try {
 
 
 try {
-    $person = new Person('John Doe', '12345', 'example@fakemail.fakess'); 
+    $person = new Person('John Doe', '12345', 'example@gmail.com'); 
 
-    pl('--------- [Start testing Gmail validation] --------');
+    pl('--------- [Start testing Email validation] --------');
     pl('Email to validate: ' . $person->getEmail());
 
-    // Validar formato del correo
-    if (filter_var($person->getEmail(), FILTER_VALIDATE_EMAIL)) {
-        // Llamada a la función de validación del correo
-        $response = $person->verificationGmail($person->getEmail());
+    // Llamada a la función de validación del correo
+    $response = $person->validateEmail($person->getEmail());
 
-        // Mensajes personalizados según el estado del correo
-        if ($response['status'] === 'undeliverable') {
-            pl('Email is not valid.');
-        } else {
-            pl('Email is valid.');
-        }
+    // Mensaje único según el estado del correo
+    if ($response['isValid'] && $response['deliverability'] === 'DELIVERABLE') {
+        pl('Email is valid and deliverable.');
     } else {
-        pl('Email is not valid.');
+        pl('Email is not valid or undeliverable.');
     }
 } catch (\InvalidArgumentException $e) {
     pl('Invalid Argument Error: ' . $e->getMessage());
 } catch (\Exception $e) {
-    pl('Unexpected error during Gmail validation: ' . $e->getMessage());
+    pl('Unexpected error during Email validation: ' . $e->getMessage());
 }
+
