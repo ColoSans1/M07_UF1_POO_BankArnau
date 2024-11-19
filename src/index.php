@@ -154,14 +154,17 @@ try {
 pl('--------- [Start testing international account dollar conversion] --------');
 
 try {
-    $nationalAccount = new InternationalBankAccount(400.0, 1.10); 
+    // Crear una cuenta internacional con saldo en EUR y convertirlo a USD (por ejemplo)
+    $nationalAccount = new InternationalBankAccount(400.0, 'EUR'); // Saldo en EUR, moneda base
 
     pl('Initial balance of national account (EUR): ' . $nationalAccount->getBalance());
 
-    $convertedBalance = $nationalAccount->getConvertedCurrency(); 
-    pl('Converted balance to EUR (using conversion API): ' . $convertedBalance);
+    // Convertir a USD usando la API de conversión
+    $convertedBalance = $nationalAccount->getConvertedCurrency('USD'); // Convertir a USD
+    pl('Converted balance to USD (using conversion API): ' . $convertedBalance);
 
-    pl('Converted balance (expected 330 EUR): ' . $convertedBalance);
+    // Mostrar el valor esperado
+    pl('Converted balance (expected 400 EUR converted to USD): ' . $convertedBalance);
 
 } catch (\InvalidArgumentException $e) {
     pl($e->getMessage());
@@ -172,56 +175,132 @@ try {
     pl('Unexpected error: ' . $e->getMessage());
 }
 
-// ---[Start testing international account dollar conversion]---/
-pl('--------- [Start testing international account dollar conversion] --------');
 
+// --- Test 1: Verify national bank account returns currency in EUR ---
+pl('--------- [Test 1: National Bank Account returns currency in EUR] --------');
 try {
-    $nationalAccount = new InternationalBankAccount(400.0, 1.10); 
-
-    pl('Initial balance of national account (EUR): ' . $nationalAccount->getBalance());
-
-    $convertedBalance = $nationalAccount->getConvertedCurrency(); 
-    pl('Converted balance to EUR (using conversion API): ' . $convertedBalance);
-
-    pl('Converted balance (expected 330 EUR): ' . $convertedBalance);
-
-} catch (\InvalidArgumentException $e) {
+    // Crear una cuenta nacional con saldo en EUR
+    $nationalBankAccount = new NationalBankAccount(500.0);
+    pl('Currency in national account: EUR');
+    pl('Initial balance: ' . $nationalBankAccount->getBalance() . ' EUR');
+} catch (Exception $e) {
     pl($e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
-} catch (\Exception $e) {
-    pl('Unexpected error: ' . $e->getMessage());
 }
 
+// --- Test 2: Verify international bank account returns currency in EUR with no converted balance ---
+pl('--------- [Test 2: International Bank Account with no conversion returns EUR] --------');
 try {
-    $person = new Person('John Doe', '12345', 'example@gmail.com'); 
+    // Crear una cuenta internacional con saldo en EUR y sin conversión
+    $intlBankAccount = new InternationalBankAccount(500.0, 'EUR'); // Moneda base: EUR, sin conversión
+    pl('Currency in international account: EUR');
+    pl('Initial balance: ' . $intlBankAccount->getBalance() . ' EUR');
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
 
-    pl('--------- [Start testing Email validation] --------');
-    pl('Email to validate: ' . $person->getEmail());
+// --- Test 3: Verify international bank account returns currency in USD with balance converted ---
+pl('--------- [Test 3: International Bank Account with conversion returns USD] --------');
+try {
+    // Crear una cuenta internacional con saldo en EUR y convertir a USD
+    $intlBankAccount = new InternationalBankAccount(500.0, 'EUR'); // Saldo en EUR
+    $convertedBalance = $intlBankAccount->getConvertedCurrency('USD'); // Convertir a USD
+    pl('Currency in international account: USD');
+    pl('Converted balance: ' . $convertedBalance . ' USD');
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
 
-    // Llamada a la función de validación del correo
+
+// --- Test 4: Verify a valid email for an account holder ---
+pl('--------- [Test 4: Valid Email for Account Holder] --------');
+try {
+    // Utilizamos un correo válido para el primer ejemplo
+    $person = new Person('John Doe', '12345', 'example1@gmail.com');
+    pl('Valid email: ' . $person->getEmail());
     $response = $person->validateEmail($person->getEmail());
-
-    // Mensaje único según el estado del correo
     if ($response['isValid'] && $response['deliverability'] === 'DELIVERABLE') {
         pl('Email is valid and deliverable.');
     } else {
         pl('Email is invalid or undeliverable.');
     }
-
-    // error
-    $person->setEmail('test');
-    pl('Testing invalid email (test): ' . $person->getEmail());
-    $response = $person->validateEmail($person->getEmail());
-
-    if ($response['isValid']) {
-        pl('Email is valid.');
-    }
-} catch (\Exception $e) {
-    pl('Error: ' . $e->getMessage());
+} catch (Exception $e) {
+    pl($e->getMessage());
 }
 
-// Display Test Results
-pl('Test complete.');
+// --- Test 5: Verify an invalid email for an account holder ---
+pl('--------- [Test 5: Invalid Email for Account Holder] --------');
+try {
+    // Utilizamos un correo con formato incorrecto para el segundo ejemplo
+    $person = new Person('Jane Smith', '67890', 'invalidemail2');
+    pl('Invalid email: ' . $person->getEmail());
+    $response = $person->validateEmail($person->getEmail());
+    if (!$response['isValid']) {
+        pl('Email is invalid.');
+    }
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
+
+// Test 6: Verify deposit allowed by fraud functionality
+pl('--------- [Test 6: Verify deposit allowed by fraud functionality] --------');
+try {
+    $bankAccount = new BankAccount(500.0);  // Balance inicial
+    pl('Balance before deposit: ' . $bankAccount->getBalance());
+    
+    // Simula un depósito de 5000 (permitido según la API)
+    $depositTransaction = new DepositTransaction(5000); 
+    $bankAccount->transaction($depositTransaction);
+    pl('Balance after deposit: ' . $bankAccount->getBalance());  // Debe ser 5000 + 500 = 5500
+
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
+// Test 7: Verify deposit blocked by fraud functionality
+pl('--------- [Test 7: Verify deposit blocked by fraud functionality] --------');
+try {
+    $bankAccount = new BankAccount(500.0);  // Balance inicial
+    pl('Balance before deposit: ' . $bankAccount->getBalance());
+    
+    // Simula un depósito de 20000 (bloqueado por la API)
+    $depositTransaction = new DepositTransaction(20000); 
+    $bankAccount->transaction($depositTransaction);
+    pl('Balance after deposit: ' . $bankAccount->getBalance());  // No se actualizará el saldo
+
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
+// Test 8: Verify withdraw allowed by fraud functionality
+pl('--------- [Test 8: Verify withdraw allowed by fraud functionality] --------');
+try {
+    $bankAccount = new BankAccount(5000.0);  // Balance inicial
+    pl('Balance before withdrawal: ' . $bankAccount->getBalance());
+    
+    // Simula un retiro de 1000 (permitido según la API)
+    $withdrawTransaction = new WithdrawTransaction(1000); 
+    $bankAccount->transaction($withdrawTransaction);
+    pl('Balance after withdrawal: ' . $bankAccount->getBalance());  // Debe ser 5000 - 1000 = 4000
+
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
+// Test 9: Verify withdraw blocked by fraud functionality
+pl('--------- [Test 9: Verify withdraw blocked by fraud functionality] --------');
+try {
+    $bankAccount = new BankAccount(5000.0);  // Balance inicial
+    pl('Balance before withdrawal: ' . $bankAccount->getBalance());
+    
+    // Simula un retiro de 10000 (bloqueado por la API)
+    $withdrawTransaction = new WithdrawTransaction(10000); 
+    $bankAccount->transaction($withdrawTransaction);
+    pl('Balance after withdrawal: ' . $bankAccount->getBalance());  // No se actualizará el saldo
+
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
 ?>
+

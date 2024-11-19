@@ -2,24 +2,27 @@
 
 namespace ComBank\Bank;
 
-use ComBank\Bank\ApiTrait;
-
-
-namespace ComBank\Bank;
+use ComBank\Bank\Traits\ApiTrait;  
 
 class InternationalBankAccount extends BankAccount
 {
-    private $conversionRate;
+    use ApiTrait;  
 
-    public function __construct($balance, $conversionRate)
+    private string $currency; 
+
+    public function __construct(float $balance, string $currency = 'EUR')
     {
-        parent::__construct($balance);
-        $this->conversionRate = $conversionRate;
+        parent::__construct($balance);  
+        $this->currency = $currency;
     }
 
-    // Método para obtener el saldo convertido
-    public function getConvertedCurrency()
+    public function getConvertedCurrency(string $toCurrency = 'USD'): float
     {
-        return $this->getBalance() * $this->conversionRate;
+        try {
+            // Convertimos el saldo actual a la divisa indicada
+            return $this->convertCurrency($this->getBalance(), $this->currency, $toCurrency);
+        } catch (\Exception $e) {
+            throw new \Exception("Error durante la conversión: " . $e->getMessage());
+        }
     }
 }

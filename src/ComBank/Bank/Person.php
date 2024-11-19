@@ -5,7 +5,7 @@ use ComBank\Bank\Traits\ApiTrait;
 
 class Person
 {
-    use ApiTrait; 
+    use ApiTrait;
 
     private string $name;
     private string $idCard;
@@ -14,7 +14,10 @@ class Person
     public function __construct($name, $idCard, $email)
     {
         $validation = $this->validateEmail($email);
-        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE')
+        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE') {
+            // Maneja el caso en que el email no es válido
+            throw new \Exception("Invalid or undeliverable email address.");
+        }
 
         $this->name = $name;
         $this->idCard = $idCard;
@@ -50,9 +53,10 @@ class Person
 
     public function setEmail($email)
     {
-        // Validar el email antes de asignarlo
         $validation = $this->validateEmail($email);
-        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE')
+        if (!$validation['isValid'] || $validation['deliverability'] !== 'DELIVERABLE') {
+            throw new \Exception("Invalid or undeliverable email address.");
+        }
         $this->email = $email;
         return $this;
     }
