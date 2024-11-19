@@ -19,6 +19,8 @@
  use ComBank\Exceptions\InvalidOverdraftFundsException;
  use ComBank\Exceptions\ZeroAmountException;
  use ComBank\Bank\Person;
+ use Combank\Bank\trait;
+
  require_once 'bootstrap.php';
  require_once __DIR__ . '/../vendor/autoload.php'; 
  

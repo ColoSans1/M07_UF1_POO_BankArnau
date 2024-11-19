@@ -1,57 +1,60 @@
 <?php
+namespace ComBank\Person;
 
-namespace ComBank\Bank;
+use ComBank\Person\Exceptions\InvalidEmailException;
 
-use ComBank\Bank\ApiTrait;
-
-class Person 
+use Combank\Bank\ApiTrait;
+class Person
 {
+    private string $name;
+    private string $idCard;
+    private string $email;
 
 
-
-    private $name;
-    private $idcard;
-    private $email;
-    private $bankAccount;
-
-    public function __construct(string $name, string $idcard, string $email, float $balance = 0.0)
+    public function __construct($name, $idCard, $email)
     {
-        $this->name = $name;
-        $this->idcard = $idcard;
-        $this->email = $email;
-        $this->bankAccount = new BankAccount($balance);  
+         
+        if ($this->validateEmail($email)) {
+            $this->name = $name;
+            $this->idCard = $idCard;
+            $this->email = $email;
+        } 
     }
 
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
-    public function getIdcard(): string
+    public function getIdCard()
     {
-        return $this->idcard;
+        return $this->idCard;
     }
 
-    public function setIdcard(string $idcard): void
+    public function setIdCard($idCard)
     {
-        $this->idcard = $idcard;
+        $this->idCard = $idCard;
+
+        return $this;
     }
 
-    public function getEmail(): string
+    public function getEmail()
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+
+    public function setEmail($email)
     {
         $this->email = $email;
+
+        return $this;
     }
-
- 
-
 }
