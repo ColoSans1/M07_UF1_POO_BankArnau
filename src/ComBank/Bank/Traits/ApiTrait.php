@@ -7,7 +7,9 @@ use ComBank\Transactions\Contracts\BankTransactionInterface;
 trait ApiTrait
 {
     private string $fraudApiUrl = 'https://673b5147339a4ce4451baa5a.mockapi.io/FraudDetection/transactions';
-    private string $apiUrlGmail = 'https://emailvalidation.abstractapi.com/v1/?api_key=2d07314255484ac29e131d918e04dcf1&email=';
+    private string $apiUrlGmail = 'https://emailvalidation.abstractapi.com/v1/?api_key=5ea504eea90045e989ed2390a189de40&email=';
+    private string $apiUrlPhone = 'https://phonevalidation.abstractapi.com/v1/?api_key=4e50b2d406e44fc082cf28ba7f4c5aad&phone=';
+
 
     private function makeApiRequest(string $url): string
     {
@@ -54,6 +56,36 @@ trait ApiTrait
         }
     }
     
+
+    public function validatePhone(string $phone): array
+    {
+        if (empty($phone)) {
+            throw new \InvalidArgumentException('Phone number is required.');
+        }
+
+        $url = $this->apiUrlPhone . urlencode($phone);
+        $response = $this->makeApiRequest($url);
+        $data = json_decode($response, true);
+
+        if (isset($data['error'])) {
+            throw new \Exception('API error: ' . $data['error']['message']);
+        }
+
+        return [
+            'phone' => $data['phone'] ?? $phone,
+            'valid' => $data['valid'] ?? false,
+            'international_format' => $data['format']['international'] ?? '',
+            'local_format' => $data['format']['local'] ?? '',
+            'country' => [
+                'code' => $data['country']['code'] ?? '',
+                'name' => $data['country']['name'] ?? '',
+                'prefix' => $data['country']['prefix'] ?? '',
+            ],
+            'location' => $data['location'] ?? 'Unknown',
+            'type' => $data['type'] ?? 'Unknown',
+            'carrier' => $data['carrier'] ?? 'Unknown',
+        ];
+    }
     
 
     public function validateEmail(string $email): array

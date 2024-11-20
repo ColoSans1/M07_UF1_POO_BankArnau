@@ -302,5 +302,29 @@ try {
     pl($e->getMessage());
 }
 
+class ApiHelper {
+    use \ComBank\Bank\Traits\ApiTrait;
+}
+
+pl('--------- [Test 10: Phone Verification Test] --------');
+try {
+    $apiHelper = new ApiHelper();
+
+    $phoneNumber = '34612345678';
+
+    $phoneInfo = $apiHelper->validatePhone($phoneNumber);
+
+    pl('Phone: ' . $phoneInfo['phone']);
+    pl('Valid: ' . ($phoneInfo['valid'] ? 'Yes' : 'No'));
+    pl('International Format: ' . $phoneInfo['international_format']);
+    pl('Local Format: ' . $phoneInfo['local_format']);
+    pl('Country: ' . $phoneInfo['country']['name'] . ' (' . $phoneInfo['country']['code'] . ')');
+    pl('Prefix: ' . $phoneInfo['country']['prefix']);
+    pl('Location: ' . $phoneInfo['location']);
+} catch (Exception $e) {
+    pl('Error: ' . $e->getMessage());
+}
+
+
 ?>
 
