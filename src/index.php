@@ -210,12 +210,11 @@ try {
     pl($e->getMessage());
 }
 
-
 // --- Test 4: Verify a valid email for an account holder ---
 pl('--------- [Test 4: Valid Email for Account Holder] --------');
 try {
     // Utilizamos un correo válido para el primer ejemplo
-    $person = new Person('John Doe', '12345', 'example1@gmail.com');
+    $person = new Person('Arnau Colominas', '12345', 'arnau.colominas@gmail.com');
     pl('Valid email: ' . $person->getEmail());
     $response = $person->validateEmail($person->getEmail());
     if ($response['isValid'] && $response['deliverability'] === 'DELIVERABLE') {
@@ -231,7 +230,7 @@ try {
 pl('--------- [Test 5: Invalid Email for Account Holder] --------');
 try {
     // Utilizamos un correo con formato incorrecto para el segundo ejemplo
-    $person = new Person('Jane Smith', '67890', 'invalidemail2');
+    $person = new Person('Arnau Colominas', '67890', 'invalidemail2');
     pl('Invalid email: ' . $person->getEmail());
     $response = $person->validateEmail($person->getEmail());
     if (!$response['isValid']) {
@@ -240,7 +239,6 @@ try {
 } catch (Exception $e) {
     pl($e->getMessage());
 }
-
 
 // Test 6: Verify deposit allowed by fraud functionality
 pl('--------- [Test 6: Verify deposit allowed by fraud functionality] --------');
@@ -302,6 +300,7 @@ try {
     pl($e->getMessage());
 }
 
+<<<<<<< HEAD
 class ApiHelper {
     use \ComBank\Bank\Traits\ApiTrait;
 }
@@ -325,6 +324,8 @@ try {
     pl('Error: ' . $e->getMessage());
 }
 
+=======
+>>>>>>> 2b90a2ffa949a84e53219d096fa4d449cae67fbe
 
 ?>
 
