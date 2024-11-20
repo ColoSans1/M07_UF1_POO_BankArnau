@@ -25,28 +25,30 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
     public function applyTransaction(BackAccountInterface $account): float
     {
         $newBalance = $account->getBalance() - $this->getAmount();
-
+    
         if ($newBalance < 0) {
             $overdraft = $account->getOverdraft();
-
-            if ($overdraft->getOverdraftFundsAmount() <= 0) {
+    
+            if ($overdraft->getOverdraftFundsAmount() === 0.0) {
                 throw new InvalidOverdraftFundsException(
                     "You cannot withdraw this amount of money, your overdraft limit is 0."
                 );
             }
-
-            // Si excede los límites permitidos del sobregiro
+    
             if (!$overdraft->isGrantOverdraftFunds($newBalance)) {
                 throw new FailedTransactionException(
                     "You cannot withdraw this amount of money, your overdraft limit is exceeded."
                 );
             }
         }
-
+    
+        // Actualizamos el saldo de la cuenta si no hubo excepciones
         $account->setBalance($newBalance);
-
+    
         return $account->getBalance();
     }
+    
+    
 
     public function getTransaction(): string
     {
