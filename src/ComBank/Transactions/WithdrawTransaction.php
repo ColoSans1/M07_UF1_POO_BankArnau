@@ -17,7 +17,6 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
             throw new ZeroAmountException("The amount cannot be zero or negative.");
         }
 
-        // Validación adicional (si aplica según tu lógica de negocio)
         parent::validateAmount($amount);
 
         $this->amount = $amount;
@@ -27,11 +26,9 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
     {
         $newBalance = $account->getBalance() - $this->getAmount();
 
-        // Verificar si el balance resultante es negativo
         if ($newBalance < 0) {
             $overdraft = $account->getOverdraft();
 
-            // Si no hay fondos de sobregiro disponibles
             if ($overdraft->getOverdraftFundsAmount() <= 0) {
                 throw new InvalidOverdraftFundsException(
                     "You cannot withdraw this amount of money, your overdraft limit is 0."
@@ -46,7 +43,6 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
             }
         }
 
-        // Aplicar el nuevo balance
         $account->setBalance($newBalance);
 
         return $account->getBalance();

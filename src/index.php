@@ -300,7 +300,6 @@ try {
     pl($e->getMessage());
 }
 
-<<<<<<< HEAD
 class ApiHelper {
     use \ComBank\Bank\Traits\ApiTrait;
 }
@@ -323,9 +322,6 @@ try {
 } catch (Exception $e) {
     pl('Error: ' . $e->getMessage());
 }
-
-=======
->>>>>>> 2b90a2ffa949a84e53219d096fa4d449cae67fbe
 
 ?>
 
