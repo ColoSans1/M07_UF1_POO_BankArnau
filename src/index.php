@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Created by VS Code.
- * User: JPortugal
- * Date: 7/27/24
- * Time: 7:24 PM
- */
-
 use ComBank\Bank\BankAccount;
 use ComBank\Bank\NationalBankAccount;
 use ComBank\Bank\InternationalBankAccount;
@@ -21,12 +14,11 @@ use ComBank\Bank\Person;
 use ComBank\Bank\trait\ApiTrait;
 
 require_once 'bootstrap.php';
-require_once __DIR__ . '/../vendor/autoload.php'; 
+
 
 //---[Bank account 1]---/
 pl('--------- [Start testing bank account #1, No overdraft] --------');
 try {
-
     $bankAccount1 = new BankAccount(400);
     
     // show balance account
@@ -53,23 +45,14 @@ try {
     // withdrawal -600
     pl('Doing transaction withdrawal (-600) with current balance ' . $bankAccount1->getBalance());
     $bankAccount1->transaction(new WithdrawTransaction(600));
-} catch (ZeroAmountException $e) {
-    pl($e->getMessage());
-} catch (BankAccountException $e) {
-    pl($e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction : ' . $bankAccount1->getBalance());
-} catch (ZeroAmountException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-} catch (InvalidOverdraftFundsException $e) {
-    pl('Error transaction: ' . $e->getMessage());
+
+} catch (ZeroAmountException | BankAccountException | FailedTransactionException | InvalidOverdraftFundsException $e) {
+    pl('Error: ' . $e->getMessage());
 }
 
 //---[Bank account 2]---/
 pl('--------- [Start testing bank account #2, Silver overdraft (100.0 funds)] --------');
 try {
-
     $bankAccount2 = new BankAccount(100.0);
     $bankAccount2->applyOverdraft(new SilverOverdraft());
     // show balance account
@@ -81,7 +64,7 @@ try {
     pl('My new balance after deposit (+100) : ' . $bankAccount2->getBalance());
 
     // withdrawal -300
-    pl('Doing transaction deposit (-300) with current balance ' . $bankAccount2->getBalance());
+    pl('Doing transaction withdrawal (-300) with current balance ' . $bankAccount2->getBalance());
     $bankAccount2->transaction(new WithdrawTransaction(300));
     pl('My new balance after withdrawal (-300) : ' . $bankAccount2->getBalance());
 
@@ -93,31 +76,11 @@ try {
     // withdrawal -120
     pl('Doing transaction withdrawal (-120) with current balance ' . $bankAccount2->getBalance());
     $bankAccount2->transaction(new WithdrawTransaction(120));
-} catch (InvalidArgumentException $e) {
-    pl('' . $e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction : ' . $bankAccount2->getBalance());
-} catch (ZeroAmountException $e) {
-    pl('' . $e->getMessage());
+} catch (ZeroAmountException | FailedTransactionException | InvalidOverdraftFundsException $e) {
+    pl('Error: ' . $e->getMessage());
 }
 
-try {
-    pl('Doing transaction withdrawal (-20) with current balance : ' . $bankAccount2->getBalance());
-    $bankAccount2->transaction(new WithdrawTransaction(20));
-    pl('My new balance after withdrawal (-20) with funds : ' . $bankAccount2->getBalance());
-} catch (InvalidArgumentException $e) {
-    pl('' . $e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction : ' . $bankAccount2->getBalance());
-} catch (ZeroAmountException $e) {
-    pl('' . $e->getMessage());
-}
-
-// ---[Start testing national account (no conversion)]---/
 pl('--------- [Start testing national account (no conversion)] --------');
-
 try {
     // Crear una cuenta nacional con un saldo inicial de 500 EUR
     $nationalAccount = new BankAccount(500.0);
@@ -139,20 +102,12 @@ try {
     pl('Attempting withdrawal of -700 EUR with current balance ' . $nationalAccount->getBalance());
     $nationalAccount->transaction(new WithdrawTransaction(700));
 
-} catch (ZeroAmountException $e) {
-    pl($e->getMessage());
-} catch (BankAccountException $e) {
-    pl($e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
-} catch (InvalidOverdraftFundsException $e) {
-    pl('Error transaction: ' . $e->getMessage());
+} catch (ZeroAmountException | BankAccountException | FailedTransactionException | InvalidOverdraftFundsException $e) {
+    pl('Error: ' . $e->getMessage());
 }
 
-// ---[Start testing international account dollar conversion]---/
+//---[Start testing international account dollar conversion]---/
 pl('--------- [Start testing international account dollar conversion] --------');
-
 try {
     // Crear una cuenta internacional con saldo en EUR y convertirlo a USD (por ejemplo)
     $nationalAccount = new InternationalBankAccount(400.0, 'EUR'); // Saldo en EUR, moneda base
@@ -163,58 +118,14 @@ try {
     $convertedBalance = $nationalAccount->getConvertedCurrency('USD'); // Convertir a USD
     pl('Converted balance to USD (using conversion API): ' . $convertedBalance);
 
-    // Mostrar el valor esperado
-    pl('Converted balance (expected 400 EUR converted to USD): ' . $convertedBalance);
-
-} catch (\InvalidArgumentException $e) {
-    pl($e->getMessage());
-} catch (FailedTransactionException $e) {
-    pl('Error transaction: ' . $e->getMessage());
-    pl('My balance after failed last transaction: ' . $nationalAccount->getBalance());
-} catch (\Exception $e) {
-    pl('Unexpected error: ' . $e->getMessage());
+} catch (\InvalidArgumentException | FailedTransactionException | \Exception $e) {
+    pl('Error: ' . $e->getMessage());
 }
 
-
-// --- Test 1: Verify national bank account returns currency in EUR ---
-pl('--------- [Test 1: National Bank Account returns currency in EUR] --------');
+//--- Test Email Validation --- 
+pl('--------- [Test Email Validation] --------');
 try {
-    // Crear una cuenta nacional con saldo en EUR
-    $nationalBankAccount = new NationalBankAccount(500.0);
-    pl('Currency in national account: EUR');
-    pl('Initial balance: ' . $nationalBankAccount->getBalance() . ' EUR');
-} catch (Exception $e) {
-    pl($e->getMessage());
-}
-
-// --- Test 2: Verify international bank account returns currency in EUR with no converted balance ---
-pl('--------- [Test 2: International Bank Account with no conversion returns EUR] --------');
-try {
-    // Crear una cuenta internacional con saldo en EUR y sin conversión
-    $intlBankAccount = new InternationalBankAccount(500.0, 'EUR'); // Moneda base: EUR, sin conversión
-    pl('Currency in international account: EUR');
-    pl('Initial balance: ' . $intlBankAccount->getBalance() . ' EUR');
-} catch (Exception $e) {
-    pl($e->getMessage());
-}
-
-// --- Test 3: Verify international bank account returns currency in USD with balance converted ---
-pl('--------- [Test 3: International Bank Account with conversion returns USD] --------');
-try {
-    // Crear una cuenta internacional con saldo en EUR y convertir a USD
-    $intlBankAccount = new InternationalBankAccount(500.0, 'EUR'); // Saldo en EUR
-    $convertedBalance = $intlBankAccount->getConvertedCurrency('USD'); // Convertir a USD
-    pl('Currency in international account: USD');
-    pl('Converted balance: ' . $convertedBalance . ' USD');
-} catch (Exception $e) {
-    pl($e->getMessage());
-}
-
-// --- Test 4: Verify a valid email for an account holder ---
-pl('--------- [Test 4: Valid Email for Account Holder] --------');
-try {
-    // Utilizamos un correo válido para el primer ejemplo
-    $person = new Person('Arnau Colominas', '12345', 'arnau.colominas@gmail.com');
+    $person = new Person('Arnau Colominas', '12345', 'emailvalidation.abstractapi.com');
     pl('Valid email: ' . $person->getEmail());
     $response = $person->validateEmail($person->getEmail());
     if ($response['isValid'] && $response['deliverability'] === 'DELIVERABLE') {
@@ -226,102 +137,76 @@ try {
     pl($e->getMessage());
 }
 
-// --- Test 5: Verify an invalid email for an account holder ---
-pl('--------- [Test 5: Invalid Email for Account Holder] --------');
+// --------- [Prueba 6: Depósito permitido por funcionalidad antifraude] --------
+pl('--------- [Prueba 6: Depósito permitido por funcionalidad antifraude] --------');
 try {
-    // Utilizamos un correo con formato incorrecto para el segundo ejemplo
-    $person = new Person('Arnau Colominas', '67890', 'invalidemail2');
-    pl('Invalid email: ' . $person->getEmail());
-    $response = $person->validateEmail($person->getEmail());
-    if (!$response['isValid']) {
-        pl('Email is invalid.');
-    }
-} catch (Exception $e) {
-    pl($e->getMessage());
-}
-
-// Test 6: Verify deposit allowed by fraud functionality
-pl('--------- [Test 6: Verify deposit allowed by fraud functionality] --------');
-try {
+    // Crear una cuenta bancaria con un saldo inicial de 500.0
     $bankAccount = new BankAccount(500.0);  // Balance inicial
-    pl('Balance before deposit: ' . $bankAccount->getBalance());
+    pl('Saldo antes del depósito: ' . $bankAccount->getBalance());
     
     // Simula un depósito de 5000 (permitido según la API)
     $depositTransaction = new DepositTransaction(5000); 
     $bankAccount->transaction($depositTransaction);
-    pl('Balance after deposit: ' . $bankAccount->getBalance());  // Debe ser 5000 + 500 = 5500
+    pl('Saldo después del depósito: ' . $bankAccount->getBalance());  // Debe ser 5000 + 500 = 5500
 
 } catch (Exception $e) {
+    // En caso de error, se captura y muestra el mensaje
     pl($e->getMessage());
 }
 
-// Test 7: Verify deposit blocked by fraud functionality
-pl('--------- [Test 7: Verify deposit blocked by fraud functionality] --------');
+// --------- [Prueba 7: Verificar depósito bloqueado por funcionalidad antifraude] --------
+pl('--------- [Prueba 7: Verificar depósito bloqueado por funcionalidad antifraude] --------');
 try {
+    // Crear una cuenta bancaria con un saldo inicial de 500.0
     $bankAccount = new BankAccount(500.0);  // Balance inicial
-    pl('Balance before deposit: ' . $bankAccount->getBalance());
+    pl('Saldo antes del depósito: ' . $bankAccount->getBalance());
     
-    // Simula un depósito de 20000 (bloqueado por la API)
+    // Simula un depósito de 20000 (bloqueado por la API debido a fraude)
     $depositTransaction = new DepositTransaction(20000); 
-    $bankAccount->transaction($depositTransaction);
-    pl('Balance after deposit: ' . $bankAccount->getBalance());  // No se actualizará el saldo
+    $bankAccount->transaction($depositTransaction);  // Este depósito debe ser bloqueado por la API
+    pl('Saldo después del depósito: ' . $bankAccount->getBalance());  // No debe cambiar, el saldo sigue siendo 500
 
 } catch (Exception $e) {
+    // En caso de error, se captura y muestra el mensaje
     pl($e->getMessage());
 }
 
-// Test 8: Verify withdraw allowed by fraud functionality
-pl('--------- [Test 8: Verify withdraw allowed by fraud functionality] --------');
+// --------- [Prueba 8: Verificar retiro permitido por funcionalidad antifraude] --------
+pl('--------- [Prueba 8: Verificar retiro permitido por funcionalidad antifraude] --------');
 try {
+    // Crear una cuenta bancaria con un saldo inicial de 5000.0
     $bankAccount = new BankAccount(5000.0);  // Balance inicial
-    pl('Balance before withdrawal: ' . $bankAccount->getBalance());
+    pl('Saldo antes del retiro: ' . $bankAccount->getBalance());
     
-    // Simula un retiro de 1000 (permitido según la API)
-    $withdrawTransaction = new WithdrawTransaction(1000); 
-    $bankAccount->transaction($withdrawTransaction);
-    pl('Balance after withdrawal: ' . $bankAccount->getBalance());  // Debe ser 5000 - 1000 = 4000
-
+    // Simula un retiro de 1000 (permitido según la API, no bloqueado por fraude)
 } catch (Exception $e) {
+    // En caso de error, se captura y muestra el mensaje
     pl($e->getMessage());
 }
 
-// Test 9: Verify withdraw blocked by fraud functionality
-pl('--------- [Test 9: Verify withdraw blocked by fraud functionality] --------');
-try {
-    $bankAccount = new BankAccount(5000.0);  // Balance inicial
-    pl('Balance before withdrawal: ' . $bankAccount->getBalance());
-    
-    // Simula un retiro de 10000 (bloqueado por la API)
-    $withdrawTransaction = new WithdrawTransaction(10000); 
-    $bankAccount->transaction($withdrawTransaction);
-    pl('Balance after withdrawal: ' . $bankAccount->getBalance());  // No se actualizará el saldo
 
-} catch (Exception $e) {
-    pl($e->getMessage());
-}
-
+// Clase ApiHelper para utilizar la función de verificación de teléfono
 class ApiHelper {
     use \ComBank\Bank\Traits\ApiTrait;
 }
 
-pl('--------- [Test 10: Phone Verification Test] --------');
+// --------- [Prueba 10: Verificación de teléfono] --------
+pl('--------- [Prueba 10: Verificación de teléfono] --------');
 try {
+    // Usamos la función de validación de teléfono proporcionada por ApiTrait
     $apiHelper = new ApiHelper();
-
     $phoneNumber = '34612345678';
-
-    $phoneInfo = $apiHelper->validatePhone($phoneNumber);
-
-    pl('Phone: ' . $phoneInfo['phone']);
-    pl('Valid: ' . ($phoneInfo['valid'] ? 'Yes' : 'No'));
-    pl('International Format: ' . $phoneInfo['international_format']);
-    pl('Local Format: ' . $phoneInfo['local_format']);
-    pl('Country: ' . $phoneInfo['country']['name'] . ' (' . $phoneInfo['country']['code'] . ')');
-    pl('Prefix: ' . $phoneInfo['country']['prefix']);
-    pl('Location: ' . $phoneInfo['location']);
+    $phoneInfo = $apiHelper->validatePhone($phoneNumber);  // Se valida el número de teléfono
+    
+    // Mostrar la información del número de teléfono
+    pl('Teléfono: ' . $phoneInfo['phone']);
+    pl('Válido: ' . ($phoneInfo['valid'] ? 'Sí' : 'No'));
+    pl('Formato internacional: ' . $phoneInfo['international_format']);
+    pl('Formato local: ' . $phoneInfo['local_format']);
+    pl('País: ' . $phoneInfo['country']['name'] . ' (' . $phoneInfo['country']['code'] . ')');
+    pl('Prefijo: ' . $phoneInfo['country']['prefix']);
+    pl('Ubicación: ' . $phoneInfo['location']);
 } catch (Exception $e) {
+    // En caso de error en la validación, se captura y muestra el mensaje
     pl('Error: ' . $e->getMessage());
 }
-
-?>
-
