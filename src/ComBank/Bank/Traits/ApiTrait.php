@@ -112,9 +112,17 @@ trait ApiTrait
             'movementType' => $transaction->getTransaction(),
             'amount' => $transaction->getAmount(),
         ];
-
-        return $this->makeApiRequest($this->fraudApiUrl, $postData);
+    
+        $response = $this->makeApiRequest($this->fraudApiUrl, $postData);
+    
+        // Manejo de respuesta, por ejemplo:
+        if (isset($response['fraudulent']) && $response['fraudulent']) {
+            throw new \Exception("Fraudulent transaction detected.");
+        }
+    
+        return $response;
     }
+    
 
     /**
      * Convertir monedas usando una API externa
