@@ -125,6 +125,22 @@ try {
 //--- Test Email Validation --- 
 pl('--------- [Test Email Validation] --------');
 try {
+    $person = new Person('Arnau Colominas', '12345', 'arnaucolominassans2004@gmail.com');
+    pl('Valid email: ' . $person->getEmail());
+    $response = $person->validateEmail($person->getEmail());
+    if ($response['isValid'] && $response['deliverability'] === 'DELIVERABLE') {
+        pl('Email is valid and deliverable.');
+    } else {
+        pl('Email is invalid or undeliverable.');
+    }
+} catch (Exception $e) {
+    pl($e->getMessage());
+}
+
+
+//--- Test Email Validation --- 
+pl('--------- [Test Email Validation] --------');
+try {
     $person = new Person('Arnau Colominas', '12345', 'emailvalidation.abstractapi.com');
     pl('Valid email: ' . $person->getEmail());
     $response = $person->validateEmail($person->getEmail());
